@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
-import { toast } from 'react-toastify'; // Assuming you're using react-toastify for notifications
+import { useToast } from './use-toast'; // Assuming you're using react-toastify for notifications
 
 const registerUser = async (userData) => {
   const response = await axios.post("http://localhost:5000/api/auth/register", userData);
@@ -8,6 +8,7 @@ const registerUser = async (userData) => {
 };
 
 export const useCreateUserAccountMutation = () => {
+  const { toast } = useToast();
   return useMutation({
     mutationFn: (user) => registerUser(user),
     onSuccess: () => {
