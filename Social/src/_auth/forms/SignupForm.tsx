@@ -1,9 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -13,12 +13,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { SignupValidation } from "@/lib/validation";
+import { useCreateUserAccountMutation } from "@/hooks/useUser";
 import { z } from "zod";
 import Loader from "@/components/shared/Loader";
 import axios from "axios";
 
 const SignupForm = () => {
-  const isLoading = false;
+  const { toast } = useToast();
+  const { mutate: registerUser, isLoading: isCreatingUser } = useCreateUserAccountMutation();
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof SignupValidation>>({
@@ -39,20 +41,12 @@ const SignupForm = () => {
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof SignupValidation>) {
-    try {
       console.log("Sending POST request with data:", values);
       const avatarUrl = createDefaultAvatar(values.firstName, values.lastName);
       const newUser = { ...values, imageUrl: avatarUrl };
-      const response = await axios.post(
-        "http://localhost:5000/api/auth/register",
-        newUser
-      );
-      console.log("User registered successfully:", response.data);
-    } catch (error) {
-      console.error("There was an error registering the user!", error);
-    }
+      registerUser(newUser);
   }
-
+     
   return (
     <Form {...form}>
       <div className="sm:w-420 flex-center flex-col">
@@ -134,7 +128,7 @@ const SignupForm = () => {
             )}
           />
           <Button type="submit" className="shad-button_primary">
-            {isLoading ? (
+            {isCreatingUser ? (
               <div className="flex-center gap-2">
                 <Loader /> Loading..
               </div>
